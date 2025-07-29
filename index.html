@@ -35,25 +35,30 @@
       cursor: pointer;
     }
     .menu-popup {
-      display: none;
-      position: absolute;
-      top: 2.5rem;
-      right: 0;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.2);
-      z-index: 10;
-    }
-    .menu-popup a {
-      display: block;
-      padding: 0.5rem 1rem;
-      text-decoration: none;
-      color: #000;
-    }
-    .menu-popup a:hover {
-      background: #f0f0f0;
-    }
+  position: fixed;
+  top: 0;
+  right: -250px;
+  width: 250px;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+  padding: 1rem;
+  transition: right 0.3s ease;
+  z-index: 999;
+}
+
+.menu-popup.open {
+  right: 0;
+}
+
+.menu-popup a {
+  display: block;
+  margin: 1rem 0;
+  font-size: 1.2rem;
+  color: #333;
+  text-decoration: none;
+}
+
     .container {
       max-width: 600px;
       margin: 2rem auto;
@@ -69,6 +74,7 @@
       font-size: 1rem;
       border-radius: 5px;
       border: 1px solid #ccc;
+      box-sizing: border-box;
     }
     button:not(#menu-button) {
       background: #0a0;
@@ -105,6 +111,19 @@
   margin: 10px auto;
   display: block;
 }
+.options-popup button {
+  width: 100%;
+  margin: 0.2rem 0;
+  background: #ddd;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem;
+}
+.options-popup button:hover {
+  background: #ccc;
+}
+
   </style>
 </head>
 <body>
@@ -121,10 +140,12 @@
 
   <div class="container">
     <h2>سجل تمرينك اليوم</h2>
-    <input type="text" id="exercise" placeholder="اسم التمرين">
-    <input type="text" id="sets" placeholder="عدد التكرارات أو المدة">
-    <textarea id="note" rows="4" placeholder="ملاحظاتك"></textarea>
+    <input type="text" id="exercise" placeholder="اسم التمرين" required>
+<input type="text" id="sets" placeholder="عدد التكرارات أو المدة" required>
+<textarea id="note" rows="4" placeholder="ملاحظاتك" required></textarea>
     <button onclick="saveEntry()">حفظ</button>
+    <button onclick="confirmReset()">إعادة تعيين الكل</button>
+
 
     <div class="log" id="log"></div>
   </div>
@@ -163,23 +184,63 @@
     }
 
     function showEntries() {
-      const entries = JSON.parse(localStorage.getItem("fitnessLog") || "[]");
-      logContainer.innerHTML = entries.map(e => `
-        <div class="entry">
-          <div class="date">${e.date}</div>
-          <div><strong>التمرين:</strong> ${e.exercise || '-'} </div>
-          <div><strong>العدد/المدة:</strong> ${e.sets || '-'} </div>
-          <div><strong>ملاحظات:</strong> ${e.note || '-'} </div>
-        </div>
-      `).join("");
-    }
+  const entries = JSON.parse(localStorage.getItem("fitnessLog") || "[]");
+  logContainer.innerHTML = entries.map((e, index) => `
+    <div class="entry">
+      <div class="date">${e.date}</div>
+      <div><strong>التمرين:</strong> ${e.exercise || '-'} </div>
+      <div><strong>العدد/المدة:</strong> ${e.sets || '-'} </div>
+      <div><strong>ملاحظات:</strong> ${e.note || '-'} </div>
+      <button onclick="showOptions(${index})">تحديد</button>
+      <div class="options-popup" id="options-${index}" style="display:none; margin-top: 0.5rem;">
+        <button onclick="editEntry(${index})">📝 تعديل</button>
+        <button onclick="confirmDelete(${index})">🗑️ حذف</button>
+      </div>
+    </div>
+  `).join("");
+}
+function showOptions(index) {
+  const el = document.getElementById(`options-${index}`);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function editEntry(index) {
+  const entries = JSON.parse(localStorage.getItem("fitnessLog") || "[]");
+  const entry = entries[index];
 
-    document.getElementById("menu-button").addEventListener("click", () => {
-      const popup = document.getElementById("menu-popup");
-      popup.style.display = popup.style.display === "block" ? "none" : "block";
-    });
+  document.getElementById("exercise").value = entry.exercise;
+  document.getElementById("sets").value = entry.sets;
+  document.getElementById("note").value = entry.note;
+
+  entries.splice(index, 1);
+  localStorage.setItem("fitnessLog", JSON.stringify(entries));
+  showEntries();
+}
+
+
+    const popup = document.getElementById("menu-popup");
+document.getElementById("menu-button").addEventListener("click", () => {
+  popup.classList.toggle("open");
+});
+
 
     showEntries();
+
+    function confirmDelete(index) {
+  if (confirm("هل تريد حذف هذا التمرين؟")) {
+    let entries = JSON.parse(localStorage.getItem("fitnessLog") || "[]");
+    entries.splice(index, 1);
+    localStorage.setItem("fitnessLog", JSON.stringify(entries));
+    showEntries();
+  }
+}
+
+function confirmReset() {
+  if (confirm("هل أنت متأكد أنك تريد حذف كل البيانات؟")) {
+    localStorage.removeItem("fitnessLog");
+    showEntries();
+  }
+}
+
   </script>
 </body>
 </html>
