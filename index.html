@@ -37,14 +37,19 @@
     .menu-popup {
   position: fixed;
   top: 0;
-  right: -250px;
+  right: 0;
+  transform: translateX(100%);
   width: 250px;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.95);
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.98);
   box-shadow: -2px 0 8px rgba(0,0,0,0.3);
   padding: 1rem;
-  transition: right 0.3s ease;
-  z-index: 999;
+  transition: transform 0.3s ease;
+  z-index: 9999;
+}
+
+.menu-popup.open {
+  transform: translateX(0%);
 }
 
 .menu-popup.open {
@@ -133,8 +138,10 @@
   <div class="menu-container">
       <button id="menu-button">☰</button>
       <div class="menu-popup" id="menu-popup">
-        <a href="https://samer7667.github.io/links-site/" target="_blank">🔗 مركز المواقع</a>
-      </div>
+  <button onclick="closeMenu()" style="float:left; font-size:1.2rem; background:none; border:none; cursor:pointer;">✖</button>
+  <a href="https://samer7667.github.io/links-site/" target="_blank">🔗 مركز المواقع</a>
+</div>
+
     </div>
   </header>
 
@@ -218,9 +225,14 @@ function editEntry(index) {
 
 
     const popup = document.getElementById("menu-popup");
+
 document.getElementById("menu-button").addEventListener("click", () => {
-  popup.classList.toggle("open");
+  popup.classList.add("open");
 });
+
+function closeMenu() {
+  popup.classList.remove("open");
+}
 
 
     showEntries();
