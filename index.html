@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>يومي الرياضي</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background: #000;
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    .menu-container {
+      position: relative;
+    }
+    #menu-button {
+      background: none;
+      border: none;
+      color: #0f0;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .menu-popup {
+      display: none;
+      position: absolute;
+      top: 2.5rem;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+    .menu-popup a {
+      display: block;
+      padding: 0.5rem 1rem;
+      text-decoration: none;
+      color: #000;
+    }
+    .menu-popup a:hover {
+      background: #f0f0f0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.8rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button:not(#menu-button) {
+      background: #0a0;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    button:not(#menu-button):hover {
+      background: #070;
+    }
+    .log {
+      margin-top: 2rem;
+    }
+    .entry {
+      background: #eee;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 5px;
+    }
+    .date {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      color: #222;
+    }
+    .PROGRAMMER-SAMMER-img {
+  width: 30vw;
+  max-width: 120px;
+  height: auto;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  margin: 10px auto;
+  display: block;
+}
+  </style>
+</head>
+<body>
+  <header style="flex-direction: column; text-align: center;">
+  <img src="profile.JPG" alt="صورة المبرمج" class="PROGRAMMER-SAMMER-img">
+  <h1>يومي الرياضي</h1>
+  <div class="menu-container">
+      <button id="menu-button">☰</button>
+      <div class="menu-popup" id="menu-popup">
+        <a href="https://samer7667.github.io/links-site/" target="_blank">🔗 مركز المواقع</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <h2>سجل تمرينك اليوم</h2>
+    <input type="text" id="exercise" placeholder="اسم التمرين">
+    <input type="text" id="sets" placeholder="عدد التكرارات أو المدة">
+    <textarea id="note" rows="4" placeholder="ملاحظاتك"></textarea>
+    <button onclick="saveEntry()">حفظ</button>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <script>
+    const logContainer = document.getElementById("log");
+
+    function getTodayDate() {
+      const d = new Date();
+      return d.toLocaleDateString("ar-EG", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function saveEntry() {
+      const exercise = document.getElementById("exercise").value.trim();
+      const sets = document.getElementById("sets").value.trim();
+      const note = document.getElementById("note").value.trim();
+
+      if (!exercise && !sets && !note) return;
+
+      const entry = {
+        date: getTodayDate(),
+        exercise,
+        sets,
+        note
+      };
+
+      let entries = JSON.parse(localStorage.getItem("fitnessLog") || "[]");
+      entries.unshift(entry);
+      localStorage.setItem("fitnessLog", JSON.stringify(entries));
+
+      document.getElementById("exercise").value = "";
+      document.getElementById("sets").value = "";
+      document.getElementById("note").value = "";
+
+      showEntries();
+    }
+
+    function showEntries() {
+      const entries = JSON.parse(localStorage.getItem("fitnessLog") || "[]");
+      logContainer.innerHTML = entries.map(e => `
+        <div class="entry">
+          <div class="date">${e.date}</div>
+          <div><strong>التمرين:</strong> ${e.exercise || '-'} </div>
+          <div><strong>العدد/المدة:</strong> ${e.sets || '-'} </div>
+          <div><strong>ملاحظات:</strong> ${e.note || '-'} </div>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("menu-button").addEventListener("click", () => {
+      const popup = document.getElementById("menu-popup");
+      popup.style.display = popup.style.display === "block" ? "none" : "block";
+    });
+
+    showEntries();
+  </script>
+</body>
+</html>
